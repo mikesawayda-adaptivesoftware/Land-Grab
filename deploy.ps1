@@ -1,12 +1,12 @@
-# Lang-Grab - Deploy Script (PowerShell)
+# Land-Grab - Deploy Script (PowerShell)
 # This script commits changes to GitHub and pushes a new Docker image to GitHub Container Registry
 
 $ErrorActionPreference = "Stop"
 
 $GITHUB_USER    = "mikesawayda-adaptivesoftware"
-$IMAGE_NAME     = "ghcr.io/$GITHUB_USER/lang-grab"
-$REPO_URL       = "https://github.com/mikesawayda-adaptivesoftware/Lang-Grab.git"
-$CONTAINER_NAME = "lang-grab"
+$IMAGE_NAME     = "ghcr.io/$GITHUB_USER/land-grab"
+$REPO_URL       = "https://github.com/mikesawayda-adaptivesoftware/Land-Grab.git"
+$CONTAINER_NAME = "land-grab"
 $HOST_PORT      = 3089
 $CONTAINER_PORT = 3089
 
@@ -15,7 +15,7 @@ function Write-Color($Text, $Color) {
 }
 
 Write-Color "========================================" Cyan
-Write-Color "   Lang-Grab - Deploy Script"           Cyan
+Write-Color "   Land-Grab - Deploy Script"           Cyan
 Write-Color "========================================" Cyan
 Write-Host ""
 
@@ -31,7 +31,7 @@ if (-not $gitStatus) {
     Write-Color "No changes to commit" Yellow
 } else {
     if ($args.Count -eq 0) {
-        $COMMIT_MSG = "Update Lang-Grab - $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+        $COMMIT_MSG = "Update Land-Grab - $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
         Write-Color "Using default commit message: $COMMIT_MSG" Yellow
     } else {
         $COMMIT_MSG = $args[0]

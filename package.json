@@ -1,5 +1,5 @@
 {
-  "name": "landgrab",
+  "name": "land-grab",
   "version": "1.0.0",
   "type": "module",
   "description": "Search land for sale by zip code radius, sort by price per acre",

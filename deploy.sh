@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Lang-Grab - Deploy Script
+# Land-Grab - Deploy Script
 # This script commits changes to GitHub and pushes a new Docker image to GitHub Container Registry
 
 set -e  # Exit on error
 
 GITHUB_USER="mikesawayda-adaptivesoftware"
-IMAGE_NAME="ghcr.io/${GITHUB_USER}/lang-grab"
-REPO_URL="https://github.com/mikesawayda-adaptivesoftware/Lang-Grab.git"
-CONTAINER_NAME="lang-grab"
+IMAGE_NAME="ghcr.io/${GITHUB_USER}/land-grab"
+REPO_URL="https://github.com/mikesawayda-adaptivesoftware/Land-Grab.git"
+CONTAINER_NAME="land-grab"
 HOST_PORT=3089
 CONTAINER_PORT=3089
 
@@ -20,7 +20,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}   🌍 Lang-Grab - Deploy Script${NC}"
+echo -e "${BLUE}   🌍 Land-Grab - Deploy Script${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
@@ -38,7 +38,7 @@ if [[ -z $(git status -s) ]]; then
 else
     # Get commit message from user or use default
     if [ -z "$1" ]; then
-        COMMIT_MSG="Update Lang-Grab - $(date '+%Y-%m-%d %H:%M')"
+        COMMIT_MSG="Update Land-Grab - $(date '+%Y-%m-%d %H:%M')"
         echo -e "${YELLOW}💬 Using default commit message: ${COMMIT_MSG}${NC}"
     else
         COMMIT_MSG="$1"
