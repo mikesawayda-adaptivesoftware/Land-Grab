@@ -3,9 +3,10 @@
  */
 
 /**
- * Fetch land listings near a zip code. Sorting is done client-side in App.jsx.
- * @param {{ zip: string, radiusMiles: number }} params
- * @returns {Promise<{ location: object, listings: Array, usingMockData: boolean }>}
+ * Fetch property listings near a zip code. Sorting and secondary filters are
+ * done client-side in App.jsx — only homeType triggers a new server request.
+ * @param {{ zip: string, radiusMiles: number, homeType?: string }} params
+ * @returns {Promise<{ location: object, listings: Array, usingMockData: boolean, homeType: string }>}
  */
 export async function searchListings(params) {
   const response = await fetch('/api/search', {

@@ -1,11 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { searchListings } from './api/search.js';
-import SearchForm from './components/SearchForm.jsx';
-import SortControls from './components/SortControls.jsx';
-import FilterControls, { EMPTY_FILTERS } from './components/FilterControls.jsx';
+import SearchForm, { LAND_HOME_TYPE, isLandType } from './components/SearchForm.jsx';
+import SortControls, { DEFAULT_SORT_FOR } from './components/SortControls.jsx';
+import FilterControls, { emptyFiltersFor } from './components/FilterControls.jsx';
 import ListingCard from './components/ListingCard.jsx';
 
-const DEFAULT_SORT_BY = 'pricePerAcre';
 const DEFAULT_SORT_DIR = 'asc';
 
 /** Sort a listings array by field. Nulls always sort last. */
@@ -26,22 +25,31 @@ export default function App() {
   const [error, setError] = useState(null);
   // rawListings holds the unmodified data from the API — never re-fetched just to re-sort/filter
   const [rawListings, setRawListings] = useState(null);
-  const [meta, setMeta] = useState(null); // { usingMockData, location, zip, radiusMiles }
-  const [sortBy, setSortBy] = useState(DEFAULT_SORT_BY);
+  const [meta, setMeta] = useState(null); // { usingMockData, location, zip, radiusMiles, homeType }
+  const [sortBy, setSortBy] = useState(DEFAULT_SORT_FOR(LAND_HOME_TYPE));
   const [sortDir, setSortDir] = useState(DEFAULT_SORT_DIR);
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [filters, setFilters] = useState(emptyFiltersFor(LAND_HOME_TYPE));
 
-  const handleSearch = useCallback(async ({ zip, radiusMiles }) => {
+  const activeHomeType = meta?.homeType ?? LAND_HOME_TYPE;
+
+  const handleSearch = useCallback(async ({ zip, radiusMiles, homeType }) => {
     setLoading(true);
     setError(null);
-    // Reset sort and filters to defaults on a new search
-    setSortBy(DEFAULT_SORT_BY);
+    // Reset sort and filters to type-appropriate defaults on every new search
+    const newSortBy = DEFAULT_SORT_FOR(homeType);
+    setSortBy(newSortBy);
     setSortDir(DEFAULT_SORT_DIR);
-    setFilters(EMPTY_FILTERS);
+    setFilters(emptyFiltersFor(homeType));
     try {
-      const data = await searchListings({ zip, radiusMiles });
+      const data = await searchListings({ zip, radiusMiles, homeType });
       setRawListings(data.listings ?? []);
-      setMeta({ usingMockData: data.usingMockData, location: data.location, zip, radiusMiles });
+      setMeta({
+        usingMockData: data.usingMockData,
+        location: data.location,
+        zip,
+        radiusMiles,
+        homeType: data.homeType ?? homeType,
+      });
     } catch (err) {
       setError(err.message);
       setRawListings(null);
@@ -61,32 +69,61 @@ export default function App() {
   const listings = useMemo(() => {
     if (!rawListings) return [];
 
-    const minAcres    = filters.minAcres    !== '' ? parseFloat(filters.minAcres)    : null;
-    const maxAcres    = filters.maxAcres    !== '' ? parseFloat(filters.maxAcres)    : null;
+    const isLand = isLandType(activeHomeType);
+
+    // Common filters (all types)
     const minPrice    = filters.minPrice    !== '' ? parseFloat(filters.minPrice)    : null;
     const maxPrice    = filters.maxPrice    !== '' ? parseFloat(filters.maxPrice)    : null;
     const minDistance = filters.minDistance !== '' ? parseFloat(filters.minDistance) : null;
     const maxDistance = filters.maxDistance !== '' ? parseFloat(filters.maxDistance) : null;
 
+    // Land-only filters
+    const minAcres = isLand && filters.minAcres !== '' ? parseFloat(filters.minAcres) : null;
+    const maxAcres = isLand && filters.maxAcres !== '' ? parseFloat(filters.maxAcres) : null;
+
+    // House-only filters
+    const minSqft      = !isLand && filters.minSqft      !== '' ? parseFloat(filters.minSqft)      : null;
+    const maxSqft      = !isLand && filters.maxSqft      !== '' ? parseFloat(filters.maxSqft)      : null;
+    const minBeds      = !isLand && filters.minBeds      !== '' ? parseFloat(filters.minBeds)      : null;
+    const minBaths     = !isLand && filters.minBaths     !== '' ? parseFloat(filters.minBaths)     : null;
+    const minYearBuilt = !isLand && filters.minYearBuilt !== '' ? parseFloat(filters.minYearBuilt) : null;
+    const maxYearBuilt = !isLand && filters.maxYearBuilt !== '' ? parseFloat(filters.maxYearBuilt) : null;
+
     const filtered = rawListings.filter((l) => {
-      if (minAcres    != null && (l.acreage      == null || l.acreage      < minAcres))    return false;
-      if (maxAcres    != null && (l.acreage      == null || l.acreage      > maxAcres))    return false;
-      if (minPrice    != null && (l.price        == null || l.price        < minPrice))    return false;
-      if (maxPrice    != null && (l.price        == null || l.price        > maxPrice))    return false;
+      // Common
+      if (minPrice    != null && (l.price         == null || l.price         < minPrice))    return false;
+      if (maxPrice    != null && (l.price         == null || l.price         > maxPrice))    return false;
       if (minDistance != null && (l.distanceMiles == null || l.distanceMiles < minDistance)) return false;
       if (maxDistance != null && (l.distanceMiles == null || l.distanceMiles > maxDistance)) return false;
+
+      // Land
+      if (minAcres != null && (l.acreage == null || l.acreage < minAcres)) return false;
+      if (maxAcres != null && (l.acreage == null || l.acreage > maxAcres)) return false;
+
+      // Houses
+      if (minSqft      != null && (l.livingArea == null || l.livingArea < minSqft))      return false;
+      if (maxSqft      != null && (l.livingArea == null || l.livingArea > maxSqft))      return false;
+      if (minBeds      != null && (l.bedrooms   == null || l.bedrooms   < minBeds))      return false;
+      if (minBaths     != null && (l.bathrooms  == null || l.bathrooms  < minBaths))     return false;
+      if (minYearBuilt != null && (l.yearBuilt  == null || l.yearBuilt  < minYearBuilt)) return false;
+      if (maxYearBuilt != null && (l.yearBuilt  == null || l.yearBuilt  > maxYearBuilt)) return false;
+
       return true;
     });
 
     return sortListings(filtered, sortBy, sortDir);
-  }, [rawListings, sortBy, sortDir, filters]);
+  }, [rawListings, sortBy, sortDir, filters, activeHomeType]);
+
+  const searchingFor = meta
+    ? (activeHomeType === LAND_HOME_TYPE ? 'land' : activeHomeType.toLowerCase()) + ' listings'
+    : 'listings';
 
   return (
     <div className="app">
       <header className="app-header">
         <div className="header-inner">
           <h1>🌾 LandGrab</h1>
-          <p className="tagline">Find land for sale near any US zip code</p>
+          <p className="tagline">Find properties for sale near any US zip code</p>
         </div>
       </header>
 
@@ -115,6 +152,7 @@ export default function App() {
               sortDir={sortDir}
               onChange={handleSortChange}
               total={listings.length}
+              homeType={activeHomeType}
             />
 
             <FilterControls
@@ -122,17 +160,18 @@ export default function App() {
               onChange={setFilters}
               totalRaw={rawListings.length}
               totalFiltered={listings.length}
+              homeType={activeHomeType}
             />
 
             {listings.length === 0 ? (
               <div className="no-results">
-                <p>No land listings found within {meta?.radiusMiles} miles of {meta?.zip}.</p>
-                <p>Try increasing the search radius.</p>
+                <p>No {searchingFor} found within {meta?.radiusMiles} miles of {meta?.zip}.</p>
+                <p>Try increasing the search radius or adjusting your filters.</p>
               </div>
             ) : (
               <div className="listings-grid">
                 {listings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
+                  <ListingCard key={listing.id} listing={listing} homeType={activeHomeType} />
                 ))}
               </div>
             )}
@@ -142,14 +181,14 @@ export default function App() {
         {!rawListings && !loading && !error && (
           <div className="empty-state">
             <div className="empty-icon">🗺️</div>
-            <p>Enter a zip code and radius above to start searching for land.</p>
+            <p>Enter a zip code and radius above to start searching for properties.</p>
           </div>
         )}
 
         {loading && (
           <div className="loading-state">
             <div className="loading-spinner" />
-            <p>Searching for land listings…</p>
+            <p>Searching for {searchingFor}…</p>
           </div>
         )}
       </main>
@@ -169,4 +208,3 @@ export default function App() {
     </div>
   );
 }
-

@@ -2,9 +2,24 @@ import { useRef, useState } from 'react';
 
 const RADIUS_OPTIONS = [5, 10, 25, 50, 100, 150, 200];
 
+export const HOME_TYPE_OPTIONS = [
+  { value: 'Lots-Land',     label: 'Lots & Land' },
+  { value: 'Single Family', label: 'Single Family' },
+  { value: 'Multi-Family',  label: 'Multi-Family' },
+  { value: 'Condos',        label: 'Condo / Co-op' },
+  { value: 'Townhomes',     label: 'Townhome' },
+];
+
+export const LAND_HOME_TYPE = 'Lots-Land';
+
+export function isLandType(homeType) {
+  return homeType === LAND_HOME_TYPE;
+}
+
 export default function SearchForm({ onSearch, loading }) {
   const zipRef = useRef(null);
   const radiusRef = useRef(null);
+  const [homeType, setHomeType] = useState(LAND_HOME_TYPE);
   const [zipError, setZipError] = useState('');
 
   function handleSubmit(e) {
@@ -18,7 +33,7 @@ export default function SearchForm({ onSearch, loading }) {
       return;
     }
     setZipError('');
-    onSearch({ zip, radiusMiles: radius });
+    onSearch({ zip, radiusMiles: radius, homeType });
   }
 
   return (
@@ -46,6 +61,22 @@ export default function SearchForm({ onSearch, loading }) {
             {RADIUS_OPTIONS.map((r) => (
               <option key={r} value={r}>
                 {r} miles
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="field-group">
+          <label htmlFor="home-type">Property Type</label>
+          <select
+            id="home-type"
+            value={homeType}
+            onChange={(e) => setHomeType(e.target.value)}
+            disabled={loading}
+          >
+            {HOME_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
               </option>
             ))}
           </select>

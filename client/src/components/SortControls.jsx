@@ -1,12 +1,28 @@
-const SORT_OPTIONS = [
-  { value: 'pricePerAcre', label: 'Price per Acre' },
-  { value: 'price', label: 'Total Price' },
-  { value: 'acreage', label: 'Acreage' },
+import { isLandType } from './SearchForm.jsx';
+
+const LAND_SORT_OPTIONS = [
+  { value: 'pricePerAcre',  label: 'Price per Acre' },
+  { value: 'price',         label: 'Total Price' },
+  { value: 'acreage',       label: 'Acreage' },
   { value: 'distanceMiles', label: 'Distance from Zip' },
-  { value: 'daysOnMarket', label: 'Days on Market' },
+  { value: 'daysOnMarket',  label: 'Days on Market' },
 ];
 
-export default function SortControls({ sortBy, sortDir, onChange, total }) {
+const HOUSE_SORT_OPTIONS = [
+  { value: 'price',         label: 'Total Price' },
+  { value: 'pricePerSqFt', label: 'Price per Sq Ft' },
+  { value: 'livingArea',   label: 'Sq Footage' },
+  { value: 'bedrooms',     label: 'Bedrooms' },
+  { value: 'distanceMiles', label: 'Distance from Zip' },
+  { value: 'daysOnMarket',  label: 'Days on Market' },
+];
+
+export const DEFAULT_SORT_FOR = (homeType) =>
+  isLandType(homeType) ? 'pricePerAcre' : 'price';
+
+export default function SortControls({ sortBy, sortDir, onChange, total, homeType }) {
+  const sortOptions = isLandType(homeType) ? LAND_SORT_OPTIONS : HOUSE_SORT_OPTIONS;
+
   function handleField(e) {
     onChange({ sortBy: e.target.value, sortDir });
   }
@@ -23,7 +39,7 @@ export default function SortControls({ sortBy, sortDir, onChange, total }) {
       <div className="sort-row">
         <label htmlFor="sort-field">Sort by:</label>
         <select id="sort-field" value={sortBy} onChange={handleField}>
-          {SORT_OPTIONS.map((opt) => (
+          {sortOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -37,4 +53,3 @@ export default function SortControls({ sortBy, sortDir, onChange, total }) {
     </div>
   );
 }
-
