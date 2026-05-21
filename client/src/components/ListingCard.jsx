@@ -95,6 +95,7 @@ export default function ListingCard({ listing, homeType }) {
                   : '—'
               }
             />
+            <Stat label="Acreage" value={fmtAcres(acreage)} />
             <Stat label="Price / ft²" value={fmtPrice(pricePerSqFt)} highlight />
             {yearBuilt != null && <Stat label="Year Built" value={yearBuilt} />}
           </>
