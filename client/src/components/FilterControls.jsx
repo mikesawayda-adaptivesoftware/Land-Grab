@@ -10,6 +10,8 @@ export const EMPTY_LAND_FILTERS = {
 };
 
 export const EMPTY_HOUSE_FILTERS = {
+  minAcres: '',
+  maxAcres: '',
   minPrice: '',
   maxPrice: '',
   minDistance: '',
@@ -148,18 +150,18 @@ export default function FilterControls({ filters, onChange, totalRaw, totalFilte
           unit="mi"
         />
 
-        {isLand ? (
-          /* Land-specific filters */
-          <RangeInput
-            label="Acreage"
-            nameMin="minAcres"
-            nameMax="maxAcres"
-            value={filters}
-            onChange={handleChange}
-            step={0.1}
-            unit="ac"
-          />
-        ) : (
+        {/* Acreage — shown for all types */}
+        <RangeInput
+          label="Acreage"
+          nameMin="minAcres"
+          nameMax="maxAcres"
+          value={filters}
+          onChange={handleChange}
+          step={0.1}
+          unit="ac"
+        />
+
+        {!isLand && (
           /* House-specific filters */
           <>
             <RangeInput

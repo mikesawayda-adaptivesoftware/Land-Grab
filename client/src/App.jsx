@@ -77,9 +77,9 @@ export default function App() {
     const minDistance = filters.minDistance !== '' ? parseFloat(filters.minDistance) : null;
     const maxDistance = filters.maxDistance !== '' ? parseFloat(filters.maxDistance) : null;
 
-    // Land-only filters
-    const minAcres = isLand && filters.minAcres !== '' ? parseFloat(filters.minAcres) : null;
-    const maxAcres = isLand && filters.maxAcres !== '' ? parseFloat(filters.maxAcres) : null;
+    // Acreage — applies to all property types
+    const minAcres = filters.minAcres !== '' ? parseFloat(filters.minAcres) : null;
+    const maxAcres = filters.maxAcres !== '' ? parseFloat(filters.maxAcres) : null;
 
     // House-only filters
     const minSqft      = !isLand && filters.minSqft      !== '' ? parseFloat(filters.minSqft)      : null;
@@ -96,7 +96,7 @@ export default function App() {
       if (minDistance != null && (l.distanceMiles == null || l.distanceMiles < minDistance)) return false;
       if (maxDistance != null && (l.distanceMiles == null || l.distanceMiles > maxDistance)) return false;
 
-      // Land
+      // Acreage (all types)
       if (minAcres != null && (l.acreage == null || l.acreage < minAcres)) return false;
       if (maxAcres != null && (l.acreage == null || l.acreage > maxAcres)) return false;
 
